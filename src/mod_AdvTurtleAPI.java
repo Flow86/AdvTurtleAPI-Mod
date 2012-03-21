@@ -4,7 +4,7 @@ import net.minecraft.src.AdvTurtleAPI.BlockMyTurtle;
 import net.minecraft.src.AdvTurtleAPI.TileMyEntityTurtle;
 import net.minecraft.src.dan200.turtle.shared.BlockTurtle;
 
-public class mod_CCTurtleAPI extends BaseModMp {
+public class mod_AdvTurtleAPI extends BaseModMp {
 	
 	@Override
 	public String getPriorities() {
