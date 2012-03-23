@@ -24,4 +24,7 @@ REM ---------------------------------------------------------------------------
 
 :COPYCLIENT
 	xcopy /Y /E %MODDIR%\src\*  %MCPDIR%\src\minecraft\net\minecraft\src
+
+	mkdir %MCPDIR%\jars\mods\AdvTurtleAPI\lua
+	xcopy /Y /E %MODDIR%\lua\*  %MCPDIR%\jars\mods\AdvTurtleAPI\lua
 GOTO :EOF

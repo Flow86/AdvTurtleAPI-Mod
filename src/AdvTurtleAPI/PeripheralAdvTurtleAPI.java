@@ -1,13 +1,16 @@
 package net.minecraft.src.AdvTurtleAPI;
 
 import net.minecraft.src.ItemStack;
+import net.minecraft.src.mod_AdvTurtleAPI;
 import net.minecraft.src.dan200.computer.api.IComputerAccess;
 import net.minecraft.src.dan200.computer.api.IPeripheral;
+import net.minecraft.src.dan200.turtle.shared.ITurtleListener;
 
-public class PeripheralAdvTurtleAPI implements IPeripheral {
+public class PeripheralAdvTurtleAPI implements IPeripheral, ITurtleListener {
 
 	TileMyEntityTurtle my_turtle;
 	ItemList my_list;
+	IComputerAccess my_computer;
 
 	public PeripheralAdvTurtleAPI(TileMyEntityTurtle turtle) {
 		my_turtle = turtle;
@@ -29,7 +32,7 @@ public class PeripheralAdvTurtleAPI implements IPeripheral {
 		if (aobj.length < param + 1 || !(aobj[param] instanceof String))
 			throw new Exception("Expected string");
 
-		return ((String)aobj[param]).trim();
+		return ((String) aobj[param]).trim();
 	}
 
 	private int findSlotForBlock(ItemStack itemStack) {
@@ -46,7 +49,8 @@ public class PeripheralAdvTurtleAPI implements IPeripheral {
 	private Object[] findBlockID(Object[] aobj) throws Exception {
 		int blockID = parseInteger(aobj, 0);
 		if (blockID < 1 || blockID > 65535)
-			throw new Exception((new StringBuilder()).append("block id ").append(blockID).append(" out of range").toString());
+			throw new Exception((new StringBuilder()).append("block id ").append(blockID).append(" out of range")
+					.toString());
 
 		int damageID = 0;
 		try {
@@ -82,10 +86,13 @@ public class PeripheralAdvTurtleAPI implements IPeripheral {
 
 	}
 
+	private Object[] tryCommand(int cmd) {
+		int j = my_turtle.issueCommand(mod_AdvTurtleAPI.cmdOffset + cmd);
+		return (new Object[] { Integer.valueOf(j) });
+	}
+
 	@Override
 	public Object[] callMethod(IComputerAccess icomputeraccess, int cmd, Object[] aobj) throws Exception {
-
-		System.out.println("callMethod:" + cmd + " " + aobj);
 
 		switch (cmd) {
 		case 0: // X
@@ -95,43 +102,54 @@ public class PeripheralAdvTurtleAPI implements IPeripheral {
 		case 2: // Z
 			return new Object[] { my_turtle.zCoord };
 		case 3: // findBlockID
-		case 4: // findblockid
-		case 5: // findid
 			return findBlockID(aobj);
-		case 6: // findBlock
-		case 7: // findblock
+		case 4: // findBlock
 			return findBlock(aobj);
+		default: // placeFrontLeftDown, etc
+			return tryCommand(cmd);
 		}
 
-		return null;
+		// return null;
 	}
 
 	@Override
 	public boolean canAttachToSide(int i) {
-		System.out.println("canAttachToSide: " + i);
-		return false;
+		return true;
 	}
 
 	@Override
 	public void attach(IComputerAccess icomputeraccess, String s) {
-		System.out.println("attach: " + s);
-		// icomputeraccess.mountFixedDir("rom/apis/advturtle",
-		// "mods/AdvTurtleAPI/lua/advturtleAPI.lua", true);
+		System.out.println("attach " + icomputeraccess);
+
+		my_computer = icomputeraccess;
+		icomputeraccess.mountFixedDir("rom/apis/advturtle", "mods/AdvTurtleAPI/lua/advturtle.lua", true);
 	}
 
 	@Override
 	public void detach(IComputerAccess icomputeraccess) {
-		System.out.println("detach");
-		// icomputeraccess.unmount("rom/apis/advturtle");
+		System.out.println("detach " + icomputeraccess);
+		icomputeraccess.unmount("rom/apis/advturtle");
+		my_computer = null;
 	}
 
 	@Override
 	public String[] getMethodNames() {
-		return new String[] { "x", "y", "z", "findBlockID", "findblockid", "findid", "findBlock", "findblock" };
+		return new String[] { "x", "y", "z", "findBlockID", "findBlock", "placeFrontLeftDown", "placeFrontDown",
+				"placeFrontRightDown", "placeFrontLeft", "placeFrontRight", "placeFrontLeftUp", "placeFrontUp",
+				"placeFrontRightUp", "placeLeftDown", "placeLeft", "placeLeftUp", "placeRightDown", "placeRight",
+				"placeRightUp", "placeBackLeftDown", "placeBackDown", "placeBackRightDown", "placeBackLeft",
+				"placeBack", "placeBackRight", "placeBackLeftUp", "placeBackUp", "placeBackRightUp", };
 	}
 
 	@Override
 	public String getType() {
 		return "advturtle";
+	}
+
+	@Override
+	public void commandProcessed(int cmd, boolean flag) {
+		if (my_computer != null) {
+			my_computer.queueEvent("advturtle_response", new Object[] { Integer.valueOf(cmd), Boolean.valueOf(flag) });
+		}
 	}
 }

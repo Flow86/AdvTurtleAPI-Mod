@@ -6,6 +6,8 @@ import net.minecraft.src.dan200.turtle.shared.BlockTurtle;
 
 public class mod_AdvTurtleAPI extends BaseModMp {
 	
+	public static final int cmdOffset = 1000;
+
 	@Override
 	public String getPriorities() {
 		return "after:mod_CCTurtle";
