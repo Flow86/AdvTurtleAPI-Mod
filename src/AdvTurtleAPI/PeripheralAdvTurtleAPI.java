@@ -49,8 +49,7 @@ public class PeripheralAdvTurtleAPI implements IPeripheral, ITurtleListener {
 	private Object[] findBlockID(Object[] aobj) throws Exception {
 		int blockID = parseInteger(aobj, 0);
 		if (blockID < 1 || blockID > 65535)
-			throw new Exception((new StringBuilder()).append("block id ").append(blockID).append(" out of range")
-					.toString());
+			throw new Exception((new StringBuilder()).append("block id ").append(blockID).append(" out of range").toString());
 
 		int damageID = 0;
 		try {
@@ -134,11 +133,37 @@ public class PeripheralAdvTurtleAPI implements IPeripheral, ITurtleListener {
 
 	@Override
 	public String[] getMethodNames() {
-		return new String[] { "x", "y", "z", "findBlockID", "findBlock", "placeFrontLeftDown", "placeFrontDown",
-				"placeFrontRightDown", "placeFrontLeft", "placeFrontRight", "placeFrontLeftUp", "placeFrontUp",
-				"placeFrontRightUp", "placeLeftDown", "placeLeft", "placeLeftUp", "placeRightDown", "placeRight",
-				"placeRightUp", "placeBackLeftDown", "placeBackDown", "placeBackRightDown", "placeBackLeft",
-				"placeBack", "placeBackRight", "placeBackLeftUp", "placeBackUp", "placeBackRightUp", };
+		//@formatter:off
+		return new String[] { 
+				"x", "y", "z", 
+				"findBlockID", "findBlock", 
+				
+				"placeFrontLeftDown", "placeFrontDown", "placeFrontRightDown", 
+				"placeFrontLeft", "placeFrontRight", 
+				"placeFrontLeftUp", "placeFrontUp", "placeFrontRightUp",
+				
+				"placeLeftDown", "placeRightDown",
+				"placeLeft", "placeRight",
+				"placeLeftUp", "placeRightUp", 
+				
+				"placeBackLeftDown", "placeBackDown", "placeBackRightDown", 
+				"placeBackLeft", "placeBack", "placeBackRight", 
+				"placeBackLeftUp", "placeBackUp", "placeBackRightUp",
+
+				"digFrontLeftDown", "digFrontDown", "digFrontRightDown", 
+				"digFrontLeft", "digFrontRight", 
+				"digFrontLeftUp", "digFrontUp", "digFrontRightUp",
+				
+				"digLeftDown", "digRightDown",
+				"digLeft", "digRight",
+				"digLeftUp", "digRightUp", 
+				
+				"digBackLeftDown", "digBackDown", "digBackRightDown", 
+				"digBackLeft", "digBack", "digBackRight", 
+				"digBackLeftUp", "digBackUp", "digBackRightUp",
+		
+		};
+		//@formatter:on
 	}
 
 	@Override

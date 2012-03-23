@@ -4,16 +4,36 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 
-import net.minecraft.src.Block;
-import net.minecraft.src.Item;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.ModLoader;
 import net.minecraft.src.NBTTagCompound;
 import net.minecraft.src.Packet230ModLoader;
 import net.minecraft.src.mod_AdvTurtleAPI;
-import net.minecraft.src.mod_CCTurtle;
 import net.minecraft.src.mod_ComputerCraft;
-import net.minecraft.src.dan200.computer.shared.ItemComputer;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DBase;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DLeft;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DLeftDown;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DLeftUp;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DRight;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DRightDown;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DRightUp;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBack;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackDown;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackLeft;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackLeftDown;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackLeftUp;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackRight;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackRightDown;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackRightUp;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackUp;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFrontDown;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFrontLeft;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFrontLeftDown;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFrontLeftUp;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFrontRight;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFrontRightDown;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFrontRightUp;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFrontUp;
 import net.minecraft.src.dan200.computer.shared.NetworkedComputerHelper;
 import net.minecraft.src.dan200.computer.shared.WirelessModemPeripheral;
 import net.minecraft.src.dan200.turtle.shared.TileEntityTurtle;
@@ -130,113 +150,72 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 				if (cmd < 0)
 					return;
 
-				System.out.println("Calling advturtle command: " + cmd);
+				cmd -= mod_AdvTurtleAPI.cmdOffset;
+
+				System.out.println("Calling advturtle command: " + cmd + " = " + my_peripheral.getMethodNames()[cmd]);
 
 				boolean flag = false;
 
-				cmd -= mod_AdvTurtleAPI.cmdOffset;
+				//@formatter:off
+				final Offset3DBase[] offsets = {
+						// front
+						new Offset3DFrontLeftDown(),
+						new Offset3DFrontDown(),
+						new Offset3DFrontRightDown(),
+						new Offset3DFrontLeft(),
+						//new Offset3DFront(), // this is the same as "turtle.place"
+						new Offset3DFrontRight(),
+						new Offset3DFrontLeftUp(),
+						new Offset3DFrontUp(),
+						new Offset3DFrontRightUp(),
 
-				switch (cmd) {
-				default:
+						// center
+						new Offset3DLeftDown(),
+						//new Offset3DDown(), // this is the same as "turtle.placeDown"
+						new Offset3DRightDown(),
+						new Offset3DLeft(),
+						//null,               // here is the turtle
+						new Offset3DRight(),
+						new Offset3DLeftUp(),
+						//new Offset3DDown(), // this is the same as "turtle.placeUp"
+						new Offset3DRightUp(),
+
+						// back
+						new Offset3DBackLeftDown(),
+						new Offset3DBackDown(),
+						new Offset3DBackRightDown(),
+						new Offset3DBackLeft(),
+						new Offset3DBack(),
+						new Offset3DBackRight(),
+						new Offset3DBackLeftUp(),
+						new Offset3DBackUp(),
+						new Offset3DBackRightUp()
+				};
+				//@formatter:on
+
+				// place
+				final int offset = 5;
+				// dig
+				final int offset2 = offset + offsets.length;
+
+				// place
+				if (cmd >= offset && cmd < offset2) {
+					System.out.println("Offset:" + offset + " / " + (cmd - offset));
+					flag = APIFunctions.place(this, offsets[cmd - offset], (Integer) getSuperField("m_clientState", "dir"));
+					if (flag)
+						startAnimation(4);
+				}
+
+				// dig
+				else if (cmd >= offset2 && cmd < offset2 + offsets.length) {
+					System.out.println("Offset2:" + offset2 + " / " + (cmd - offset2));
+					flag = APIFunctions.dig(this, offsets[cmd - offset2], (Integer) getSuperField("m_clientState", "dir"));
+					if (flag)
+						startAnimation(3);
+				}
+
+				else {
 					System.out.println("Unknown command: " + cmd);
-					break;
-
-				case 5: {// placeFrontLeftDown
-					final int[] xOffsetFLD = { 0, 0, -1, 1, -1, 1 };
-					final int[] yOffsetFLD = { 0, 0, -1, -1, -1, -1 };
-					final int[] zOffsetFLD = { 0, 0, -1, 1, 1, -1 };
-
-					int dir = (Integer) getSuperField("m_clientState", "dir");
-					flag = place(xOffsetFLD[dir], yOffsetFLD[dir], zOffsetFLD[dir], getOppositeDir(dir));
-
-					if (flag)
-						startAnimation(4);
-					break;
-				}
-				case 6: {// placeFrontDown
-					final int[] xOffsetFD = { 0, 0, 0, 0, -1, 1 };
-					final int[] yOffsetFD = { 0, 0, -1, -1, -1, -1 };
-					final int[] zOffsetFD = { 0, 0, -1, 1, 0, 0 };
-
-					int dir = (Integer) getSuperField("m_clientState", "dir");
-					flag = place(xOffsetFD[dir], yOffsetFD[dir], zOffsetFD[dir], getOppositeDir(dir));
-
-					if (flag)
-						startAnimation(4);
-					break;
-				}
-				case 7: {// placeFrontRightDown
-					final int[] xOffsetFRD = { 0, 0, 1, -1, -1, 1 };
-					final int[] yOffsetFRD = { 0, 0, -1, -1, -1, -1 };
-					final int[] zOffsetFRD = { 0, 0, -1, 1, -1, 1 };
-
-					int dir = (Integer) getSuperField("m_clientState", "dir");
-					flag = place(xOffsetFRD[dir], yOffsetFRD[dir], zOffsetFRD[dir], getOppositeDir(dir));
-
-					if (flag)
-						startAnimation(4);
-					break;
-				}
-				case 8: {// placeFrontLeft
-					final int[] xOffsetFL = { 0, 0, -1, 1, -1, 1 };
-					final int[] yOffsetFL = { 0, 0, 0, 0, 0, 0 };
-					final int[] zOffsetFL = { 0, 0, -1, 1, 1, -1 };
-
-					int dir = (Integer) getSuperField("m_clientState", "dir");
-					flag = place(xOffsetFL[dir], yOffsetFL[dir], zOffsetFL[dir], getOppositeDir(dir));
-
-					if (flag)
-						startAnimation(4);
-					break;
-				}
-				case 9: {// placeFrontRight
-					final int[] xOffsetFR = { 0, 0, 1, -1, -1, 1 };
-					final int[] yOffsetFR = { 0, 0, 0, 0, 0, 0 };
-					final int[] zOffsetFR = { 0, 0, -1, 1, -1, 1 };
-
-					int dir = (Integer) getSuperField("m_clientState", "dir");
-					flag = place(xOffsetFR[dir], yOffsetFR[dir], zOffsetFR[dir], getOppositeDir(dir));
-
-					if (flag)
-						startAnimation(4);
-					break;
-				}
-				case 10: {// placeFrontLeftUp
-					final int[] xOffsetFLU = { 0, 0, -1, 1, -1, 1 };
-					final int[] yOffsetFLU = { 0, 0, 1, 1, 1, 1 };
-					final int[] zOffsetFLU = { 0, 0, -1, 1, 1, -1 };
-
-					int dir = (Integer) getSuperField("m_clientState", "dir");
-					flag = place(xOffsetFLU[dir], yOffsetFLU[dir], zOffsetFLU[dir], getOppositeDir(dir));
-
-					if (flag)
-						startAnimation(4);
-					break;
-				}
-				case 11: {// placeFrontUp
-					final int[] xOffsetFU = { 0, 0, 0, 0, -1, 1 };
-					final int[] yOffsetFU = { 0, 0, 1, 1, 1, 1 };
-					final int[] zOffsetFU = { 0, 0, -1, 1, 0, 0 };
-
-					int dir = (Integer) getSuperField("m_clientState", "dir");
-					flag = place(xOffsetFU[dir], yOffsetFU[dir], zOffsetFU[dir], getOppositeDir(dir));
-
-					if (flag)
-						startAnimation(4);
-					break;
-				}
-				case 12: {// placeFrontRightUp
-					final int[] xOffsetFRU = { 0, 0, 1, -1, -1, 1 };
-					final int[] yOffsetFRU = { 0, 0, 1, 1, 1, 1 };
-					final int[] zOffsetFRU = { 0, 0, -1, 1, -1, 1 };
-
-					int dir = (Integer) getSuperField("m_clientState", "dir");
-					flag = place(xOffsetFRU[dir], yOffsetFRU[dir], zOffsetFRU[dir], getOppositeDir(dir));
-
-					if (flag)
-						startAnimation(4);
-					break;
-				}				
 				}
 
 				int commandsProcessed = (Integer) getSuperField("m_state", "commandsProcessed");
@@ -282,7 +261,7 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 		}
 	}
 
-	private Object getSuperField(String field, String subfield) {
+	public Object getSuperField(String field, String subfield) {
 		Object obj = null;
 		try {
 			obj = ModLoader.getPrivateValue(TileEntityTurtle.class, this, field);
@@ -315,7 +294,7 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 		return null;
 	}
 
-	private void startAnimation(int animation) {
+	public void startAnimation(int animation) {
 		Method startAnimation;
 		try {
 			startAnimation = TileEntityTurtle.class.getDeclaredMethod("startAnimation", int.class);
@@ -337,11 +316,33 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 		}
 	}
 
+	public boolean storeItemStack(ItemStack itemStack) {
+		Method storeItemStack;
+		try {
+			storeItemStack = TileEntityTurtle.class.getDeclaredMethod("storeItemStack", ItemStack.class);
+			storeItemStack.setAccessible(true);
+			return (Boolean) storeItemStack.invoke(this, new Object[] { itemStack });
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+
+	public void dropStack(ItemStack itemStack, int meta) {
+		Method dropStack;
+		try {
+			dropStack = TileEntityTurtle.class.getDeclaredMethod("dropStack", ItemStack.class, int.class);
+			dropStack.setAccessible(true);
+			dropStack.invoke(this, new Object[] { itemStack, meta });
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void hook() {
 		if (m_computer == null) {
 			try {
-				m_computer = (NetworkedComputerHelper) ModLoader.getPrivateValue(TileEntityTurtle.class, this,
-						"m_computer");
+				m_computer = (NetworkedComputerHelper) ModLoader.getPrivateValue(TileEntityTurtle.class, this, "m_computer");
 				my_peripheral = new PeripheralAdvTurtleAPI(this);
 				m_computer.addPeripheralAsAPI(my_peripheral);
 				// System.out.println("Successfully hooked " + this + " @" +
@@ -387,7 +388,7 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 		hook();
 	}
 
-	private int getOppositeDir(int y) {
+	public int getOppositeDir(int y) {
 		Method getOppositeDir;
 		try {
 			getOppositeDir = TileEntityTurtle.class.getDeclaredMethod("getOppositeDir", int.class);
@@ -399,52 +400,16 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 		return y;
 	}
 
-	private ItemStack takePlaceableItem(int x, int y, int z, int m) {
+	public ItemStack takePlaceableItem(int x, int y, int z, int m) {
 		Method takePlaceableItem;
 		ItemStack itemStack = null;
 		try {
-			takePlaceableItem = TileEntityTurtle.class.getDeclaredMethod("takePlaceableItem", int.class, int.class,
-					int.class, int.class);
+			takePlaceableItem = TileEntityTurtle.class.getDeclaredMethod("takePlaceableItem", int.class, int.class, int.class, int.class);
 			takePlaceableItem.setAccessible(true);
 			itemStack = (ItemStack) takePlaceableItem.invoke(this, new Object[] { x, y, z, m });
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return itemStack;
-	}
-
-	private boolean place(int xOffset, int yOffset, int zOffset, int meta) {
-		int x = xCoord + xOffset;
-		int y = yCoord + yOffset;
-		int z = zCoord + zOffset;
-
-		if (y < 1 || y >= worldObj.getWorldHeight() - 1)
-			return false;
-
-		ItemStack itemstack = takePlaceableItem(x, y, z, meta);
-
-		if (itemstack == null)
-			return false;
-
-		Item item = Item.itemsList[itemstack.itemID];
-		Block block = Block.blocksList[itemstack.itemID];
-
-		// System.out.println("place: " + xOffset + "/" + yOffset + "/" +
-		// zOffset + ": " + itemstack.itemID + "@" + meta);
-
-		if (worldObj.setBlockAndMetadataWithNotify(x, y, z, itemstack.itemID,
-				item.getMetadata(itemstack.getItemDamage()))) {
-			if (worldObj.getBlockId(x, y, z) == itemstack.itemID) {
-				block.onBlockPlaced(worldObj, x, y, z, meta);
-
-				if (item instanceof ItemComputer)
-					((ItemComputer) item).setupComputerAfterPlacement(itemstack, worldObj, x, y, z);
-			}
-
-			mod_CCTurtle.playBlockSound(worldObj, x + 0.5F, y + 0.5F, z + 0.5F, block);
-			return true;
-		}
-
-		return false;
 	}
 }
