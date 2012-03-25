@@ -11,12 +11,14 @@ import net.minecraft.src.Packet230ModLoader;
 import net.minecraft.src.mod_AdvTurtleAPI;
 import net.minecraft.src.mod_ComputerCraft;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DBase;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DDown;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DLeft;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DLeftDown;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DLeftUp;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DRight;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DRightDown;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DRightUp;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DUp;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBack;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackDown;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackLeft;
@@ -26,6 +28,7 @@ import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackRight;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackRightDown;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackRightUp;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Back.Offset3DBackUp;
+import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFront;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFrontDown;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFrontLeft;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Front.Offset3DFrontLeftDown;
@@ -101,7 +104,7 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 		updateAnimation();
 	}
 
-	public ItemStack[] getInventory() {
+	public synchronized ItemStack[] getInventory() {
 		return m_inventory;
 	}
 
@@ -154,7 +157,7 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 
 				System.out.println("Calling advturtle command: " + cmd + " = " + my_peripheral.getMethodNames()[cmd]);
 
-				boolean flag = false;
+				Object flag = false;
 
 				//@formatter:off
 				final Offset3DBase[] offsets = {
@@ -163,7 +166,7 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 						new Offset3DFrontDown(),
 						new Offset3DFrontRightDown(),
 						new Offset3DFrontLeft(),
-						//new Offset3DFront(), // this is the same as "turtle.place"
+						new Offset3DFront(), // this is the same as "turtle.place"
 						new Offset3DFrontRight(),
 						new Offset3DFrontLeftUp(),
 						new Offset3DFrontUp(),
@@ -171,13 +174,13 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 
 						// center
 						new Offset3DLeftDown(),
-						//new Offset3DDown(), // this is the same as "turtle.placeDown"
+						new Offset3DDown(), // this is the same as "turtle.placeDown"
 						new Offset3DRightDown(),
 						new Offset3DLeft(),
 						//null,               // here is the turtle
 						new Offset3DRight(),
 						new Offset3DLeftUp(),
-						//new Offset3DDown(), // this is the same as "turtle.placeUp"
+						new Offset3DUp(), // this is the same as "turtle.placeUp"
 						new Offset3DRightUp(),
 
 						// back
@@ -197,21 +200,39 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 				final int offset = 5;
 				// dig
 				final int offset2 = offset + offsets.length;
+				// compare
+				final int offset3 = offset2 + offsets.length;
+				// detect
+				final int offset4 = offset3 + offsets.length;
+
+				int face = (Integer) getSuperField("m_clientState", "dir");
 
 				// place
 				if (cmd >= offset && cmd < offset2) {
 					System.out.println("Offset:" + offset + " / " + (cmd - offset));
-					flag = APIFunctions.place(this, offsets[cmd - offset], (Integer) getSuperField("m_clientState", "dir"));
-					if (flag)
+					flag = APIFunctions.place(this, offsets[cmd - offset], face);
+					if ((Boolean) flag)
 						startAnimation(4);
 				}
 
 				// dig
 				else if (cmd >= offset2 && cmd < offset2 + offsets.length) {
 					System.out.println("Offset2:" + offset2 + " / " + (cmd - offset2));
-					flag = APIFunctions.dig(this, offsets[cmd - offset2], (Integer) getSuperField("m_clientState", "dir"));
-					if (flag)
+					flag = APIFunctions.dig(this, offsets[cmd - offset2], face);
+					if ((Boolean) flag)
 						startAnimation(3);
+				}
+
+				// compare
+				else if (cmd >= offset3 && cmd < offset3 + offsets.length) {
+					System.out.println("Offset3:" + offset3 + " / " + (cmd - offset3));
+					flag = APIFunctions.compare(this, offsets[cmd - offset3], face);
+				}
+
+				// detect
+				else if (cmd >= offset4 && cmd < offset4 + offsets.length) {
+					System.out.println("Offset4:" + offset4 + " / " + (cmd - offset4));
+					flag = APIFunctions.detect(this, offsets[cmd - offset4], face);
 				}
 
 				else {
@@ -401,15 +422,48 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 	}
 
 	public ItemStack takePlaceableItem(int x, int y, int z, int m) {
-		Method takePlaceableItem;
-		ItemStack itemStack = null;
-		try {
-			takePlaceableItem = TileEntityTurtle.class.getDeclaredMethod("takePlaceableItem", int.class, int.class, int.class, int.class);
-			takePlaceableItem.setAccessible(true);
-			itemStack = (ItemStack) takePlaceableItem.invoke(this, new Object[] { x, y, z, m });
-		} catch (Exception e) {
-			e.printStackTrace();
+		boolean flag = false;
+
+		synchronized (m_inventory) {
+			for (int i = 0; i < 9; i++) {
+				int slot = (getSelectedSlot() + i) % 9;
+
+				if (m_inventory[slot] != null && m_inventory[slot].stackSize <= 0) {
+					m_inventory[slot] = null;
+					flag = true;
+				}
+
+				if (m_inventory[slot] == null)
+					continue;
+
+				int itemID = m_inventory[slot].itemID;
+
+				if (itemID <= 0)
+					continue;
+
+				/*
+				 * Item item = Item.itemsList[itemID];
+				 * 
+				 * if (!(item instanceof ItemBlock) ||
+				 * !worldObj.canBlockBePlacedAt(itemID, x, y, z, false, m))
+				 * continue;
+				 */
+
+				ItemStack itemStack = null;
+				if (m_inventory[slot].stackSize == 1) {
+					itemStack = m_inventory[slot];
+					m_inventory[slot] = null;
+				} else
+					itemStack = m_inventory[slot].splitStack(1);
+
+				onInventoryChanged();
+				return itemStack;
+			}
 		}
-		return itemStack;
+
+		if (flag)
+			onInventoryChanged();
+
+		return null;
 	}
 }

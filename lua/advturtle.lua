@@ -3,18 +3,12 @@ if not advturtle or not turtle then
 	error( "Cannot load advanced turtle API on this computer" )
 end
 
-native = advturtle.native or advturtle
-
-local function wrap( _sCommand )
-	return function( ... )
-		local id = native[_sCommand]( ... )
-		local event, responseID, success
-		while event ~= "turtle_response" or responseID ~= id do
-			event, responseID, success = os.pullEvent( "turtle_response" )
-		end
-		return success
-	end
+if not os.loadAPI("rom/apis/turtle/turtle") then
+	error( "Unable to load turtle API on this computer!" )
+	return
 end
+
+native = advturtle.native or advturtle
 
 local function adv_wrap( _sCommand )
 	return function( ... )
@@ -30,28 +24,28 @@ end
 local advturtle = {}
 
 -- original turtle api
-advturtle["forward"] = wrap( turtle.forward )
-advturtle["back"] = wrap( turtle.back )
-advturtle["up"] = wrap( turtle.up )
-advturtle["down"] = wrap( turtle.down )
-advturtle["turnLeft"] = wrap( turtle.turnLeft )
-advturtle["turnRight"] = wrap( turtle.turnRight )
-advturtle["select"] = wrap( turtle.select )
+advturtle["forward"] = turtle.forward
+advturtle["back"] = turtle.back
+advturtle["up"] = turtle.up
+advturtle["down"] = turtle.down
+advturtle["turnLeft"] = turtle.turnLeft
+advturtle["turnRight"] = turtle.turnRight
+advturtle["select"] = turtle.select
 advturtle["getItemCount"] = turtle.getItemCount
 advturtle["getItemSpace"] = turtle.getItemSpace
-advturtle["dig"] = wrap( turtle.dig )
-advturtle["digUp"] = wrap( turtle.digUp )
-advturtle["digDown"] = wrap( turtle.digDown )
-advturtle["place"] = wrap( turtle.place )
-advturtle["placeUp"] = wrap( turtle.placeUp )
-advturtle["placeDown"] = wrap( turtle.placeDown )
-advturtle["detect"] = wrap( turtle.detect )
-advturtle["detectUp"] = wrap( turtle.detectUp )
-advturtle["detectDown"] = wrap( turtle.detectDown )
-advturtle["compare"] = wrap( turtle.compare )
-advturtle["compareUp"] = wrap( turtle.compareUp )
-advturtle["compareDown"] = wrap( turtle.compareDown )
-advturtle["drop"] = wrap( turtle.drop )
+--advturtle["dig"] = turtle.dig
+--advturtle["digUp"] = turtle.digUp
+--advturtle["digDown"] = turtle.digDown
+--advturtle["place"] = turtle.place
+--advturtle["placeUp"] = turtle.placeUp
+--advturtle["placeDown"] = turtle.placeDown
+--advturtle["detect"] = turtle.detect
+--advturtle["detectUp"] = turtle.detectUp
+--advturtle["detectDown"] = turtle.detectDown
+--advturtle["compare"] = turtle.compare
+--advturtle["compareUp"] = turtle.compareUp
+--advturtle["compareDown"] = turtle.compareDown
+advturtle["drop"] = turtle.drop
 
 -- different spellings
 advturtle["turnleft"] = advturtle["turnLeft"]
@@ -95,8 +89,20 @@ end
 advturtle["selectBlockID"] = selectBlockID
 advturtle["selectblockid"] = selectBlockid
 
-advturtle["placeFront"] = turtle.place
-advturtle["placefront"] = turtle.place
+--advturtle["placeFront"] = turtle.place
+--advturtle["placefront"] = turtle.place
+advturtle["placeFront"] = advturtle["place"]
+advturtle["placefront"] = advturtle["place"]
+
+--advturtle["detectFront"] = turtle.detect
+--advturtle["detectfront"] = turtle.detect
+advturtle["detectFront"] = advturtle["detect"]
+advturtle["detectfront"] = advturtle["detect"]
+
+--advturtle["compareFront"] = turtle.compare
+--advturtle["comparefront"] = turtle.compare
+advturtle["compareFront"] = advturtle["compare"]
+advturtle["comparefront"] = advturtle["compare"]
 
 local function left( width )
 	if width == nil then width = 1 end
@@ -157,6 +163,35 @@ for k,v in pairs( native ) do
 			advturtle[k] = adv_wrap( k )
 		end
 	end
+end
+
+local function replace( where )
+	return function( ... )
+		if advturtle["detect"..where]() and not advturtle["compare"..where]() then
+			if not advturtle["dig"..where]() then return false end
+		end
+		return advturtle["place"..where]()
+	end
+end
+
+offsets = {
+	"FrontLeftDown", "FrontDown", "FrontRightDown",
+	"FrontLeft", "Front", "FrontRight",
+	"FrontLeftUp", "FrontUp", "FrontRightUp",
+	
+	"LeftDown", "Down", "RightDown",
+	"Left",	"Right",
+	"LeftUp", "Up", "RightUp",
+	
+	"BackLeftDown", "BackDown", "BackRightDown", 
+	"BackLeft", "Back", "BackRight",
+	"BackLeftUp", "BackUp", "BackRightUp",
+}
+
+advturtle["replace"] = replace("")
+
+for k,v in pairs( offsets ) do
+	advturtle["replace"..v] = replace(v)
 end
 
 local env = getfenv()

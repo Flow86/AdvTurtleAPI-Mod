@@ -4,9 +4,8 @@ import net.minecraft.src.ItemStack;
 import net.minecraft.src.mod_AdvTurtleAPI;
 import net.minecraft.src.dan200.computer.api.IComputerAccess;
 import net.minecraft.src.dan200.computer.api.IPeripheral;
-import net.minecraft.src.dan200.turtle.shared.ITurtleListener;
 
-public class PeripheralAdvTurtleAPI implements IPeripheral, ITurtleListener {
+public class PeripheralAdvTurtleAPI implements IPeripheral {
 
 	TileMyEntityTurtle my_turtle;
 	ItemList my_list;
@@ -139,28 +138,52 @@ public class PeripheralAdvTurtleAPI implements IPeripheral, ITurtleListener {
 				"findBlockID", "findBlock", 
 				
 				"placeFrontLeftDown", "placeFrontDown", "placeFrontRightDown", 
-				"placeFrontLeft", "placeFrontRight", 
+				"placeFrontLeft", "place", "placeFrontRight", 
 				"placeFrontLeftUp", "placeFrontUp", "placeFrontRightUp",
 				
-				"placeLeftDown", "placeRightDown",
+				"placeLeftDown", "placeDown", "placeRightDown",
 				"placeLeft", "placeRight",
-				"placeLeftUp", "placeRightUp", 
+				"placeLeftUp", "placeUp", "placeRightUp", 
 				
 				"placeBackLeftDown", "placeBackDown", "placeBackRightDown", 
 				"placeBackLeft", "placeBack", "placeBackRight", 
 				"placeBackLeftUp", "placeBackUp", "placeBackRightUp",
 
 				"digFrontLeftDown", "digFrontDown", "digFrontRightDown", 
-				"digFrontLeft", "digFrontRight", 
+				"digFrontLeft", "dig", "digFrontRight", 
 				"digFrontLeftUp", "digFrontUp", "digFrontRightUp",
 				
-				"digLeftDown", "digRightDown",
+				"digLeftDown", "digDown", "digRightDown",
 				"digLeft", "digRight",
-				"digLeftUp", "digRightUp", 
+				"digLeftUp", "digUp", "digRightUp", 
 				
 				"digBackLeftDown", "digBackDown", "digBackRightDown", 
 				"digBackLeft", "digBack", "digBackRight", 
 				"digBackLeftUp", "digBackUp", "digBackRightUp",
+		
+				"compareFrontLeftDown", "compareFrontDown", "compareFrontRightDown", 
+				"compareFrontLeft", "compare", "compareFrontRight", 
+				"compareFrontLeftUp", "compareFrontUp", "compareFrontRightUp",
+				
+				"compareLeftDown", "compareDown", "compareRightDown",
+				"compareLeft", "compareRight",
+				"compareLeftUp", "compareUp", "compareRightUp", 
+				
+				"compareBackLeftDown", "compareBackDown", "compareBackRightDown", 
+				"compareBackLeft", "compareBack", "compareBackRight", 
+				"compareBackLeftUp", "compareBackUp", "compareBackRightUp",
+		
+				"detectFrontLeftDown", "detectFrontDown", "detectFrontRightDown", 
+				"detectFrontLeft", "detect", "detectFrontRight", 
+				"detectFrontLeftUp", "detectFrontUp", "detectFrontRightUp",
+				
+				"detectLeftDown", "detectDown", "detectRightDown",
+				"detectLeft", "detectRight",
+				"detectLeftUp", "detectUp", "detectRightUp", 
+				
+				"detectBackLeftDown", "detectBackDown", "detectBackRightDown", 
+				"detectBackLeft", "detectBack", "detectBackRight", 
+				"detectBackLeftUp", "detectBackUp", "detectBackRightUp",
 		
 		};
 		//@formatter:on
@@ -171,10 +194,9 @@ public class PeripheralAdvTurtleAPI implements IPeripheral, ITurtleListener {
 		return "advturtle";
 	}
 
-	@Override
-	public void commandProcessed(int cmd, boolean flag) {
+	public void commandProcessed(int cmd, Object flag) {
 		if (my_computer != null) {
-			my_computer.queueEvent("advturtle_response", new Object[] { Integer.valueOf(cmd), Boolean.valueOf(flag) });
+			my_computer.queueEvent("advturtle_response", new Object[] { Integer.valueOf(cmd), flag });
 		}
 	}
 }
