@@ -441,6 +441,9 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 				if (itemID <= 0)
 					continue;
 
+				if(!worldObj.canBlockBePlacedAt(itemID, x, y, z, false, m))
+					continue;
+				
 				/*
 				 * Item item = Item.itemsList[itemID];
 				 * 

@@ -52,14 +52,14 @@ advturtle["turnleft"] = advturtle["turnLeft"]
 advturtle["turnright"] = advturtle["turnRight"]
 advturtle["getitemcount"] = advturtle["getItemCount"]
 advturtle["getitemspace"] = advturtle["getItemSpace"]
-advturtle["digup"] = advturtle["digUp"]
-advturtle["digdown"] = advturtle["digDown"]
-advturtle["placeup"] = advturtle["placeUp"]
-advturtle["placedown"] = advturtle["placeDown"]
-advturtle["detectup"] = advturtle["detectUp"]
-advturtle["detectdown"] = advturtle["detectDown"]
-advturtle["compareup"] = advturtle["compareUp"]
-advturtle["comparedown"] = advturtle["compareDown"]
+--advturtle["digup"] = advturtle["digUp"]
+--advturtle["digdown"] = advturtle["digDown"]
+--advturtle["placeup"] = advturtle["placeUp"]
+--advturtle["placedown"] = advturtle["placeDown"]
+--advturtle["detectup"] = advturtle["detectUp"]
+--advturtle["detectdown"] = advturtle["detectDown"]
+--advturtle["compareup"] = advturtle["compareUp"]
+--advturtle["comparedown"] = advturtle["compareDown"]
 
 -- additional spellings and additional commands
 advturtle["findid"] = native["findBlockID"]
@@ -91,18 +91,12 @@ advturtle["selectblockid"] = selectBlockid
 
 --advturtle["placeFront"] = turtle.place
 --advturtle["placefront"] = turtle.place
-advturtle["placeFront"] = advturtle["place"]
-advturtle["placefront"] = advturtle["place"]
 
 --advturtle["detectFront"] = turtle.detect
 --advturtle["detectfront"] = turtle.detect
-advturtle["detectFront"] = advturtle["detect"]
-advturtle["detectfront"] = advturtle["detect"]
 
 --advturtle["compareFront"] = turtle.compare
 --advturtle["comparefront"] = turtle.compare
-advturtle["compareFront"] = advturtle["compare"]
-advturtle["comparefront"] = advturtle["compare"]
 
 local function left( width )
 	if width == nil then width = 1 end
@@ -153,10 +147,6 @@ advturtle["getPos"] = getPos
 advturtle["getpos"] = getPos
 advturtle["pos"] = getPos
 
-advturtle["placefrontleftdown"] = native["placeFrontLeftDown"]
-advturtle["placefrontdown"] = native["placeFrontDown"]
-advturtle["placefrontrightdown"] = native["placeFrontRightDown"]
-
 for k,v in pairs( native ) do
 	if type( k ) == "string" and type( v ) == "function" then
 		if advturtle[k] == nil then
@@ -164,6 +154,16 @@ for k,v in pairs( native ) do
 		end
 	end
 end
+
+advturtle["placeFront"] = advturtle["place"]
+advturtle["digFront"] = advturtle["dig"]
+advturtle["compareFront"] = advturtle["compare"]
+advturtle["detectFront"] = advturtle["detect"]
+
+advturtle["placefrontleftdown"] = advturtle["placeFrontLeftDown"]
+advturtle["placefrontdown"] = advturtle["placeFrontDown"]
+advturtle["placefrontrightdown"] = advturtle["placeFrontRightDown"]
+-- todo more lower case names
 
 local function replace( where )
 	return function( ... )
