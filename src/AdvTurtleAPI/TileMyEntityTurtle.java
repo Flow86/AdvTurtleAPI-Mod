@@ -197,7 +197,7 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 				//@formatter:on
 
 				// place
-				final int offset = 5;
+				final int offset = 6;
 				// dig
 				final int offset2 = offset + offsets.length;
 				// compare
@@ -233,6 +233,8 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 				else if (cmd >= offset4 && cmd < offset4 + offsets.length) {
 					System.out.println("Offset4:" + offset4 + " / " + (cmd - offset4));
 					flag = APIFunctions.detect(this, offsets[cmd - offset4], face);
+					if((Integer)flag == 0)
+						flag = false;
 				}
 
 				else {
@@ -396,6 +398,8 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 			m_computer = ((TileMyEntityTurtle) tileentityturtle).m_computer;
 			m_inventory = ((TileMyEntityTurtle) tileentityturtle).m_inventory;
 			my_peripheral = ((TileMyEntityTurtle) tileentityturtle).my_peripheral;
+			if(my_peripheral != null)
+				my_peripheral.setTurtle(this);
 		}
 
 		hook();

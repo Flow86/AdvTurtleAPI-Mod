@@ -99,9 +99,11 @@ public class PeripheralAdvTurtleAPI implements IPeripheral {
 			return new Object[] { my_turtle.yCoord };
 		case 2: // Z
 			return new Object[] { my_turtle.zCoord };
-		case 3: // findBlockID
+		case 3: // facing
+			return new Object[] { my_turtle.getSuperField("m_clientState", "dir") };
+		case 4: // findBlockID
 			return findBlockID(aobj);
-		case 4: // findBlock
+		case 5: // findBlock
 			return findBlock(aobj);
 		default: // placeFrontLeftDown, etc
 			return tryCommand(cmd);
@@ -134,7 +136,7 @@ public class PeripheralAdvTurtleAPI implements IPeripheral {
 	public String[] getMethodNames() {
 		//@formatter:off
 		return new String[] { 
-				"x", "y", "z", 
+				"x", "y", "z", "facing",
 				"findBlockID", "findBlock", 
 				
 				"placeFrontLeftDown", "placeFrontDown", "placeFrontRightDown", 
@@ -198,5 +200,9 @@ public class PeripheralAdvTurtleAPI implements IPeripheral {
 		if (my_computer != null) {
 			my_computer.queueEvent("advturtle_response", new Object[] { Integer.valueOf(cmd), flag });
 		}
+	}
+
+	public void setTurtle(TileMyEntityTurtle turtle) {
+		my_turtle = turtle;
 	}
 }

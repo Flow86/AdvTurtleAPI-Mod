@@ -147,6 +147,13 @@ advturtle["getPos"] = getPos
 advturtle["getpos"] = getPos
 advturtle["pos"] = getPos
 
+advturtle["x"] = native["x"]
+advturtle["y"] = native["y"]
+advturtle["z"] = native["z"]
+advturtle["dir"] = native["facing"]
+advturtle["face"] = native["facing"]
+advturtle["facing"] = native["facing"]
+
 for k,v in pairs( native ) do
 	if type( k ) == "string" and type( v ) == "function" then
 		if advturtle[k] == nil then
@@ -167,8 +174,14 @@ advturtle["placefrontrightdown"] = advturtle["placeFrontRightDown"]
 
 local function replace( where )
 	return function( ... )
-		if advturtle["detect"..where]() and not advturtle["compare"..where]() then
-			if not advturtle["dig"..where]() then return false end
+		if advturtle["detect"..where]() then
+			if advturtle["compare"..where]() then
+				return true
+			end
+			if not advturtle["dig"..where]() then
+				print("can't dig "..where)
+				return false 
+			end
 		end
 		return advturtle["place"..where]()
 	end
