@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 
+import net.minecraft.src.Item;
+import net.minecraft.src.ItemBlock;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.ModLoader;
 import net.minecraft.src.NBTTagCompound;
@@ -445,8 +447,11 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 				if (itemID <= 0)
 					continue;
 
-				if(!worldObj.canBlockBePlacedAt(itemID, x, y, z, false, m))
+				Item item = Item.itemsList[itemID];
+				if(item instanceof ItemBlock && !worldObj.canBlockBePlacedAt(itemID, x, y, z, false, m))
 					continue;
+				/*if(!item.onItemUseFirst(m_inventory[slot], APIFunctions.getTempPlayer(worldObj), worldObj, x, y - 1, z, m))
+					continue;*/
 				
 				/*
 				 * Item item = Item.itemsList[itemID];

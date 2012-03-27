@@ -10,12 +10,11 @@ import net.minecraft.src.ItemStack;
 import net.minecraft.src.World;
 import net.minecraft.src.mod_CCTurtle;
 import net.minecraft.src.AdvTurtleAPI.Offset3D.Offset3DBase;
-import net.minecraft.src.dan200.computer.shared.ItemComputer;
 
 public class APIFunctions {
 	private static EntityPlayer tempPlayer = null;
 
-	private static EntityPlayer getTempPlayer(World world) {
+	public static EntityPlayer getTempPlayer(World world) {
 		if (tempPlayer == null) {
 			tempPlayer = new EntityPlayer(world) {
 				@Override
@@ -58,14 +57,20 @@ public class APIFunctions {
 		if(item == null)
 			return false;
 		
-		if (item.onItemUse(itemStack, getTempPlayer(turtle.worldObj), turtle.worldObj, x, y - 1, z, 1)) {
-			if (item instanceof ItemComputer)
-				((ItemComputer) item).setupComputerAfterPlacement(itemStack, turtle.worldObj, x, y, z);
+		if (itemStack.useItem(getTempPlayer(turtle.worldObj), turtle.worldObj, x, y - 1, z, 1)) {
+			//if (item instanceof ItemComputer)
+			//	((ItemComputer) item).setupComputerAfterPlacement(itemStack, turtle.worldObj, x, y, z);
 
 			Block block = Block.blocksList[turtle.worldObj.getBlockId(x, y, z)];
 			if(block != null)
 				mod_CCTurtle.playBlockSound(turtle.worldObj, x + 0.5F, y + 0.5F, z + 0.5F, block);
 			return true;
+		}
+		else {
+			System.out.println("useItem failed");
+			boolean flag = turtle.storeItemStack(itemStack);
+			if (!flag)
+				turtle.dropStack(itemStack, meta);
 		}
 
 		/*
