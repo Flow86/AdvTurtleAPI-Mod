@@ -187,7 +187,7 @@ local function replace( where )
 	end
 end
 
-offsets = {
+advturtle['offsets'] = {
 	"FrontLeftDown", "FrontDown", "FrontRightDown",
 	"FrontLeft", "Front", "FrontRight",
 	"FrontLeftUp", "FrontUp", "FrontRightUp",
@@ -203,7 +203,7 @@ offsets = {
 
 advturtle["replace"] = replace("")
 
-for k,v in pairs( offsets ) do
+for k,v in pairs( advturtle['offsets'] ) do
 	advturtle["replace"..v] = replace(v)
 end
 

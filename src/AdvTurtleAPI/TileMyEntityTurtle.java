@@ -392,7 +392,7 @@ public class TileMyEntityTurtle extends TileEntityTurtle {
 
 	@Override
 	public void transferStateFrom(TileEntityTurtle tileentityturtle) {
-		System.out.println("transferStateFrom: " + this + " | " + tileentityturtle);
+		//System.out.println("transferStateFrom: " + this + " | " + tileentityturtle);
 
 		super.transferStateFrom(tileentityturtle);
 
